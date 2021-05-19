@@ -54,6 +54,7 @@ func OpenReader(file string, opt *Option) (*Reader, error) {
 	}, nil
 }
 
+// Read は encoding/csv/Reader.Read と同じ。
 func (r *Reader) Read() ([]string, error) {
 	rec, err := r.reader.Read()
 	if err == io.EOF {

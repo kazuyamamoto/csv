@@ -49,14 +49,14 @@ func TestReader_ReadShiftJIS(t *testing.T) {
 	}
 }
 
-func assertStrArrayEqual(x, y []string) error {
-	if len(x) != len(y) {
-		return fmt.Errorf("array length should be equal: len(x)=%d, len(y)=%d", len(x), len(y))
+func assertStrArrayEqual(want, got []string) error {
+	if len(want) != len(got) {
+		return fmt.Errorf("len: want %d, but got %d", len(want), len(got))
 	}
 
-	for i := 0; i < len(x); i++ {
-		if x[i] != y[i] {
-			return fmt.Errorf("element at index %d should be equal: x[%d]=%s, y[%d]=%s", i, i, x[i], i, y[i])
+	for i := 0; i < len(want); i++ {
+		if want[i] != got[i] {
+			return fmt.Errorf("index %d: want <%s>, but got <%s>", i, want[i], got[i])
 		}
 	}
 
