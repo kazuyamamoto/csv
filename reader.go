@@ -33,32 +33,32 @@ func OpenReader(file string, opt *Option) (*Reader, error) {
 		return nil, errorf("%w", err)
 	}
 
-	if opt == nil {
-		return &Reader{
-			reader: csv.NewReader(f),
-			file:   f,
-		}, nil
+	var r io.Reader = f
+	if opt != nil && opt.Encoding != nil {
+		r = transform.NewReader(f, opt.Encoding.NewDecoder())
 	}
 
-	if opt.Encoding != nil {
-		t := transform.NewReader(f, opt.Encoding.NewDecoder())
-		return &Reader{
-			reader: csv.NewReader(t),
-			file:   f,
-		}, nil
-	}
-
-	return &Reader{
-		reader: csv.NewReader(f),
+	ret := &Reader{
+		reader: csv.NewReader(r),
 		file:   f,
-	}, nil
+	}
+
+	if opt != nil {
+		ret.reader.FieldsPerRecord = opt.FieldsPerRecord
+	}
+
+	return ret, nil
 }
 
-// Read は encoding/csv/Reader.Read と同じ。
+type ParseError csv.ParseError
+
+// Read は
 func (r *Reader) Read() ([]string, error) {
 	rec, err := r.reader.Read()
 	if err == io.EOF {
 		return nil, err
+	} else if err == csv.ErrFieldCount {
+		return rec, err
 	} else if err != nil {
 		return nil, errorf("%w", err)
 	}
