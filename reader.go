@@ -33,37 +33,31 @@ func OpenReader(file string, opt *Option) (*Reader, error) {
 		return nil, errorf("%w", err)
 	}
 
+	if opt == nil {
+		return &Reader{reader: csv.NewReader(f), file: f}, nil
+	}
+
 	var r io.Reader = f
-	if opt != nil && opt.Encoding != nil {
+	if opt.Encoding != nil {
 		r = transform.NewReader(f, opt.Encoding.NewDecoder())
 	}
-
-	ret := &Reader{
-		reader: csv.NewReader(r),
-		file:   f,
-	}
-
-	if opt != nil {
-		ret.reader.FieldsPerRecord = opt.FieldsPerRecord
-	}
-
-	return ret, nil
+	c := csv.NewReader(r)
+	c.FieldsPerRecord = opt.FieldsPerRecord
+	return &Reader{reader: c, file: f}, nil
 }
 
 type ParseError csv.ParseError
 
-// Read は
+// Read は1レコードを読み取る。読み取るレコードが無い場合 nil と io.EOF を返す。
 func (r *Reader) Read() ([]string, error) {
 	rec, err := r.reader.Read()
-	if err == io.EOF {
+	if err == nil {
+		return rec, nil
+	} else if err == io.EOF {
 		return nil, err
-	} else if err == csv.ErrFieldCount {
-		return rec, err
-	} else if err != nil {
+	} else {
 		return nil, errorf("%w", err)
 	}
-
-	return rec, nil
 }
 
 // Close は CSV ファイルを閉じる。
