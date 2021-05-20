@@ -46,8 +46,6 @@ func OpenReader(file string, opt *Option) (*Reader, error) {
 	return &Reader{reader: c, file: f}, nil
 }
 
-type ParseError csv.ParseError
-
 // Read は1レコードを読み取る。読み取るレコードが無い場合 nil と io.EOF を返す。
 func (r *Reader) Read() ([]string, error) {
 	rec, err := r.reader.Read()
@@ -65,7 +63,6 @@ func (r *Reader) Close() error {
 	if err := r.file.Close(); err != nil {
 		return errorf("%w", err)
 	}
-
 	return nil
 }
 
